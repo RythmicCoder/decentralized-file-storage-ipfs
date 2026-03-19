@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IPFS + Blockchain</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .drop-area {
+            border: 2px dashed #3b82f6;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .drop-area:hover {
+            background: rgba(59,130,246,0.1);
+        }
+
+        button {
+            background: #3b82f6;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .file-preview {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        a {
+            color: #22c55e;
+            text-decoration: none;
+        }
+
+        .loader {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📁 IPFS + Blockchain Upload</h2>
+
+    <div class="drop-area" id="dropArea">
+        Drag & Drop File Here<br>or Click to Select
+        <input type="file" id="fileInput" hidden>
+    </div>
+
+    <div class="file-preview" id="filePreview"></div>
+
+    <button onclick="uploadFile()">Upload</button>
+
+    <p class="loader" id="loader">⏳ Uploading...</p>
+
+    <hr>
+
+    <h3>Stored Files</h3>
+    <button onclick="loadFiles()">Load Files</button>
+
+    <ul id="fileList"></ul>
+
+</div>
+
+<script>
+let selectedFile = null;
+
+const dropArea = document.getElementById("dropArea");
+const fileInput = document.getElementById("fileInput");
+const filePreview = document.getElementById("filePreview");
+
+// Click to open file picker
+dropArea.addEventListener("click", () => fileInput.click());
+
+// File selected
+fileInput.addEventListener("change", (e) => {
+    selectedFile = e.target.files[0];
+    showPreview();
+});
+
+// Drag & Drop
+dropArea.addEventListener("dragover", (e) => {
+    e.preventDefault();
+});
+
+dropArea.addEventListener("drop", (e) => {
+    e.preventDefault();
+    selectedFile = e.dataTransfer.files[0];
+    showPreview();
+});
+
+// Show file preview
+function showPreview() {
+    if (!selectedFile) return;
+
+    filePreview.innerText =
+        `📄 ${selectedFile.name} (${(selectedFile.size/1024).toFixed(2)} KB)`;
+}
+
+// Upload
+async function uploadFile() {
+    const loader = document.getElementById("loader");
+
+    if (!selectedFile) {
+        alert("Select a file first");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    loader.style.display = "block";
+
+    try {
+        const res = await fetch("/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        loader.style.display = "none";
+        alert("Uploaded! CID: " + data.cid);
+
+    } catch (err) {
+        loader.style.display = "none";
+        alert("Upload failed");
+    }
+}
+
+// Load files
+async function loadFiles() {
+    const res = await fetch("/files");
+    const data = await res.json();
+
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+
+    data.forEach(cid => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+    <div style="padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px;">
+        <a href="https://ipfs.io/ipfs/${cid}" target="_blank" style="color:#38bdf8; font-weight:bold;">
+            🔗 Open File
+        </a>
+        <div style="font-size:12px; color:#94a3b8; margin-top:5px;">
+            ${cid}
+        </div>
+    </div>
+`;
+
+        list.appendChild(li);
+    });
+}
+</script>
+
+</body>
+</html>
