@@ -25,6 +25,8 @@ We built a web-based system where:
 - Files are retrieved using the CID
 
 ---
+<img width="756" height="702" alt="sequence of IPFS" src="https://github.com/user-attachments/assets/4f6262e6-43b6-4123-bd40-2d8ba2de3fae" />
+
 
 ##  Tech Stack
 
@@ -166,3 +168,5 @@ This project demonstrates how decentralized technologies like IPFS can replace t
 
 ##  Author
 **Simran Kapoor**
+**Mihika Kamble**
+**Roshiv Kesarwani**
